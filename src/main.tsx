@@ -2,7 +2,9 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import { createBrowserRouter, RouterProvider } from 'react-router'
-import ControlPanel from './pages/ControlPanel.tsx'
+import Lyrics from './pages/Lyrics.tsx'
+import Verses from './pages/Verses.tsx'
+import { SocketProvider } from './context/SocketContext.tsx'
 
 const router = createBrowserRouter([
   {
@@ -10,11 +12,17 @@ const router = createBrowserRouter([
     element: <App />,
   },
   {
-    path: 'control-panel',
-    element: <ControlPanel />
+    path: 'lyrics',
+    element: <Lyrics />,
+  },
+  {
+    path: 'verses',
+    element: <Verses />,
   }
 ])
 
 createRoot(document.getElementById('root')!).render(
-  <RouterProvider router={router}/>
+  <SocketProvider>
+    <RouterProvider router={router}/>
+  </SocketProvider>
 )

@@ -1,3 +1,15 @@
+@import "tailwindcss/preflight";
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.glow {
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.5));
+}
+
 * {
-  overflow: hidden;
+  color: white;
 }

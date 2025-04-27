@@ -1,0 +1,51 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - 0.1.1-unstable
+  pull_request:
+    branches:
+      - main
+      - 0.1.1-unstable
+
+jobs:
+  build-and-preview:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+
+      # Install dependencies
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      # Build the project
+      - name: Build project
+        run: yarn build
+
+      # Run preview server in the background
+      - name: Start preview server
+        run: yarn preview &
+        env:
+          VITE_PORT: 4173
+
+      # Wait for the server to start
+      - name: Wait for server to be ready
+        run: sleep 5
+
+      # Test basic accessibility of the application
+      - name: Check if preview server is running
+        run: curl --fail http://localhost:4173/verses
+        env:
+          VITE_PORT: 4173

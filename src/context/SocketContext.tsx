@@ -1,8 +1,7 @@
 import { createContext, useEffect, useState, ReactNode } from "react";
-import { io, Socket } from "socket.io-client";
 
 interface SocketContextType {
-  socket: Socket | null;
+  socket: WebSocket | null;
 }
 
 export const SocketContext = createContext<SocketContextType>({ socket: null });
@@ -12,22 +11,27 @@ interface SocketProviderProps {
 }
 
 export const SocketProvider = ({ children }: SocketProviderProps) => {
-  const [socket, setSocket] = useState<Socket | null>(null);
+  const [socket, setSocket] = useState<WebSocket | null>(null);
 
   useEffect(() => {
-    const newSocket = io("http://localhost:5000");
+    const newSocket = new WebSocket("ws://localhost:3000/ws");
     setSocket(newSocket);
 
-    newSocket.on("connect", () => {
+    newSocket.onopen = () => {
       console.log("Connected to server");
-    });
+    };
 
-    newSocket.on("disconnect", () => {
+    newSocket.onclose = () => {
       console.log("Disconnected from server");
-    });
+      setSocket(null);
+    };
+
+    newSocket.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
 
     return () => {
-      newSocket.disconnect();
+      newSocket.close();
     };
   }, []);
 

@@ -7,7 +7,7 @@ import React from "react";
 interface TextData {
   type: "MUSIC" | "EMPTY";
   header: string | null;
-  content: string;
+  content: string | any; // Изменено для поддержки разных типов данных
 }
 
 export default function Lyrics() {
@@ -23,49 +23,94 @@ export default function Lyrics() {
   const visibleRef = useRef<HTMLDivElement>(null);
   const invisibleRef = useRef<HTMLDivElement>(null);
 
-  // Socket event listener
+  // WebSocket event listener
   useEffect(() => {
-    if (!socket) return;
+    if (!socket) {
+      console.error("WebSocket не инициализирован");
+      return;
+    }
 
-    socket.on("text", (data: TextData) => {
-      if (data.type !== "MUSIC" && data.type !== "EMPTY") {
-        setVisible(false);
-        return;
+    const handleMessage = (event: MessageEvent) => {
+      try {
+        console.log("Получено сообщение:", event.data);
+        const data = JSON.parse(event.data);
+        
+        // Проверяем, что данные имеют ожидаемую структуру
+        if (!data || (data.type !== "MUSIC" && data.type !== "EMPTY")) {
+          console.log("Получен неподдерживаемый тип сообщения:", data?.type);
+          setVisible(false);
+          return;
+        }
+        
+        // Преобразуем content в строку, если это не строка
+        const processedData: TextData = {
+          ...data,
+          content: typeof data.content === 'string' ? data.content : 
+                   data.content === null || data.content === undefined ? '' : 
+                   String(data.content)
+        };
+        
+        // Обновляем данные
+        setTextData(processedData);
+        
+        // Управляем видимостью
+        if (processedData.type === "EMPTY") {
+          setVisible(false);
+        } else {
+          const isEmpty = !processedData.content || processedData.content.trim() === "";
+          setVisible(!isEmpty);
+        }
+        
+        console.log("Данные текста обновлены:", processedData);
+      } catch (error) {
+        console.error("Ошибка при обработке сообщения WebSocket:", error);
       }
+    };
 
-      if (data.type === "EMPTY") {
-        setVisible(false);
-      } else {
-        const isEmpty = !data.content || data.content.trim() === "";
-        setVisible(!isEmpty);
-      }
-
-      setTextData(data);
-    });
+    // Добавляем обработчик сообщений
+    socket.addEventListener("message", handleMessage);
+    
+    // Проверка состояния соединения
+    console.log("Состояние WebSocket:", socket.readyState);
+    
+    // Добавляем обработчик для отслеживания состояния соединения
+    const handleOpen = () => console.log("WebSocket соединение установлено");
+    const handleClose = () => console.log("WebSocket соединение закрыто");
+    const handleError = (error: Event) => console.error("Ошибка WebSocket:", error);
+    
+    socket.addEventListener("open", handleOpen);
+    socket.addEventListener("close", handleClose);
+    socket.addEventListener("error", handleError);
 
     return () => {
-      socket.off("text");
+      // Удаляем все обработчики при размонтировании
+      socket.removeEventListener("message", handleMessage);
+      socket.removeEventListener("open", handleOpen);
+      socket.removeEventListener("close", handleClose);
+      socket.removeEventListener("error", handleError);
     };
   }, [socket]);
 
-  // Fullscreen toggle
+  // Переключение полноэкранного режима
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch((err) =>
-        console.error(`Error entering fullscreen: ${err.message}`)
+        console.error(`Ошибка перехода в полноэкранный режим: ${err.message}`)
       );
     } else if (document.exitFullscreen) {
       document.exitFullscreen();
     }
   };
 
-  // Adjust text size
+  // Функция настройки размера текста
   const adjustTextSize = () => {
-    if (!visibleRef.current || !invisibleRef.current || !containerRef.current) return;
+    if (!visibleRef.current || !invisibleRef.current || !containerRef.current) {
+      console.log("Ссылки на DOM-элементы не готовы");
+      return;
+    }
 
     const invisibleDiv = invisibleRef.current;
     const container = containerRef.current;
-    let currentSize = fontSize;
     const maxSize = 100;
     const minSize = 10;
 
@@ -77,6 +122,7 @@ export default function Lyrics() {
     ) {
       let min = minSize;
       let max = maxSize;
+      let currentSize = fontSize;
 
       while (min <= max) {
         const mid = Math.floor((min + max) / 2);
@@ -92,32 +138,49 @@ export default function Lyrics() {
           currentSize = mid;
         }
       }
+      
+      console.log("Установлен размер шрифта:", Math.min(max, currentSize));
+      setFontSize(Math.min(max, currentSize));
     } else {
-      currentSize = maxSize;
+      console.log("Установлен максимальный размер шрифта:", maxSize);
+      setFontSize(maxSize);
     }
-
-    setFontSize(currentSize);
   };
 
-  // Adjust text size on text change or window resize
+  // Подстройка размера текста при изменении текста или размера окна
   useEffect(() => {
+    console.log("Текст или видимость изменились, пересчитываем размер");
+    
+    // Используем таймаут для гарантии обновления DOM перед измерениями
     if (visible) {
-      adjustTextSize();
+      const timer = setTimeout(() => {
+        adjustTextSize();
+      }, 50);
+      return () => clearTimeout(timer);
     }
+  }, [textData, visible]);
 
+  // Обработчик изменения размера окна
+  useEffect(() => {
     const handleResize = () => {
       if (visible) {
+        console.log("Размер окна изменился, пересчитываем размер текста");
         adjustTextSize();
       }
     };
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [textData, visible]);
+  }, [visible]);
 
-  // Render invisible content for text size calculation
+  // Рендеринг невидимого контента для расчета размера текста
   const renderInvisibleContent = () => {
     if (textData.type === "EMPTY" || !textData.content) return null;
+
+    // Убедимся, что content точно строка
+    const contentStr = typeof textData.content === 'string' 
+      ? textData.content 
+      : String(textData.content);
 
     return (
       <>
@@ -125,10 +188,10 @@ export default function Lyrics() {
           <span className="block text-[70%] mb-4">{textData.header}</span>
         )}
         <div>
-          {textData.content.split("\n").map((line, index) => (
-            <React.Fragment key={index}>
+          {contentStr.split("\n").map((line, index) => (
+            <React.Fragment key={`invisible-${index}`}>
               {line}
-              {index < textData.content.split("\n").length - 1 && <br />}
+              {index < contentStr.split("\n").length - 1 && <br />}
             </React.Fragment>
           ))}
         </div>
@@ -156,10 +219,11 @@ export default function Lyrics() {
             <motion.div
               ref={visibleRef}
               className="font-arial pt-4 px-4 w-full h-full flex flex-col items-center justify-center text-shadow-lg glow"
+              key={`content-${JSON.stringify(textData.content)}`} // Используем JSON.stringify для любого типа данных
             >
               <MusicContent
                 header={textData.header}
-                content={textData.content}
+                content={typeof textData.content === 'string' ? textData.content : String(textData.content)}
                 fontSize={fontSize}
               />
             </motion.div>

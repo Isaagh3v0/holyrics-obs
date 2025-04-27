@@ -22,28 +22,35 @@ export default function Verses() {
   const visibleRef = useRef<HTMLDivElement>(null);
   const invisibleRef = useRef<HTMLDivElement>(null);
 
-  // Socket event listener
+  // WebSocket event listener
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("text", (data: TextData) => {
-      if (data.type !== "BIBLE" && data.type !== "EMPTY") {
-        setVisible(false);
-        return;
-      }
+    const handleMessage = (event: MessageEvent) => {
+      try {
+        const data: TextData = JSON.parse(event.data);
+        if (data.type !== "BIBLE" && data.type !== "EMPTY") {
+          setVisible(false);
+          return;
+        }
 
-      if (data.type === "EMPTY") {
-        setVisible(false);
-      } else {
-        const isEmpty = !data.content || data.content.length === 0;
-        setVisible(!isEmpty);
-      }
+        if (data.type === "EMPTY") {
+          setVisible(false);
+        } else {
+          const isEmpty = !data.content || data.content.length === 0;
+          setVisible(!isEmpty);
+        }
 
-      setTextData(data);
-    });
+        setTextData(data);
+      } catch (error) {
+        console.error("Error parsing WebSocket message:", error);
+      }
+    };
+
+    socket.addEventListener("message", handleMessage);
 
     return () => {
-      socket.off("text");
+      socket.removeEventListener("message", handleMessage);
     };
   }, [socket]);
 
@@ -169,7 +176,7 @@ export default function Verses() {
         >
           {/* Blurred background image */}
           <img
-            src="/background.png" // Помести изображение в public/
+            src="/background.png"
             alt="Background"
             className="absolute inset-0 w-full h-full object-cover filter blur-md opacity-70"
           />

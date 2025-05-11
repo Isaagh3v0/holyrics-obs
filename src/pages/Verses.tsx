@@ -167,21 +167,13 @@ export default function Verses() {
         <motion.div
           key="screen-container"
           ref={containerRef}
-          className="w-screen h-screen overflow-hidden relative"
+          className="w-screen h-screen overflow-hidden relative bg-black"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8 }}
           onDoubleClick={toggleFullscreen}
         >
-          {/* Blurred background image */}
-          <img
-            src="/background.png"
-            alt="Background"
-            className="absolute inset-0 w-full h-full object-cover filter blur-md opacity-70"
-          />
-          {/* Semi-transparent overlay */}
-          <div className="absolute inset-0 bg-black/50" />
           <motion.div
             key="text-container"
             className="w-full h-full flex items-center justify-center text-white text-center relative z-10"

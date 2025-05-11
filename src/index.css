@@ -1,9 +1,16 @@
 @import "tailwindcss/preflight";
 @tailwind utilities;
 
+@font-face {
+  font-family: "DM Sans";
+  src: url("/DMSans-VariableFont.woff2") format("woff2-variations"),
+       url("/DMSans-VariableFont.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
 }
 
 .glow {
@@ -12,4 +19,5 @@ body {
 
 * {
   color: white;
+  font-family: "DM Sans", sans-serif;
 }

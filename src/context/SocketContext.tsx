@@ -14,7 +14,8 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
   const [socket, setSocket] = useState<WebSocket | null>(null);
 
   useEffect(() => {
-    const newSocket = new WebSocket("ws://localhost:3000/ws");
+    const wsUrl = import.meta.env.VITE_WS_SERVER_URL || "ws://localhost:8080";
+    const newSocket = new WebSocket(wsUrl);
     setSocket(newSocket);
 
     newSocket.onopen = () => {

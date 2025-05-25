@@ -1,54 +1,45 @@
-# React + TypeScript + Vite
+# Holyrics OBS
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Приложение для отображения текстов песен и библейских стихов в OBS Studio. Позволяет легко переключаться между текстами песен и стихами, с автоматической адаптацией размера текста под размер окна.
 
-Currently, two official plugins are available:
+## Особенности
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Отображение текстов песен и библейских стихов
+- Автоматическая адаптация размера шрифта
+- Красивые анимации появления текста
+- Поддержка заголовков для песен и стихов
+- Адаптивный дизайн
+- Интеграция с OBS Studio
 
-## Expanding the ESLint configuration
+## Установка
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+1. Клонируйте репозиторий:
+```bash
+git clone https://github.com/Isaagh3v0/holyrics-obs.git
+cd holyrics-obs
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+2. Установите зависимости:
+```bash
+bun install
 ```
+
+3. Запустите приложение в режиме разработки:
+```bash
+bun dev
+```
+
+## Использование в OBS
+
+1. Запустите приложение
+2. В OBS Studio добавьте новый источник "Браузер"
+3. Укажите URL вашего приложения (по умолчанию http://localhost:5173)
+4. Настройте размер окна в OBS
+
+## Технологии
+
+- React
+- TypeScript
+- Vite
+- Framer Motion
+- Tailwind CSS

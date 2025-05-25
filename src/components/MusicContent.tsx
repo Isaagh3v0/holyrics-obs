@@ -54,7 +54,7 @@ export default function MusicContent({ header, content, fontSize: initialFontSiz
       if (!containerRef.current || !testRef.current) return;
 
       const container = containerRef.current;
-      let fontSize = initialFontSize * 1.8;
+      let fontSize = initialFontSize * 1.2;
       let fits = false;
 
       // Создаем временный элемент для измерения
@@ -122,7 +122,7 @@ export default function MusicContent({ header, content, fontSize: initialFontSiz
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.1 + index * 0.05 }}
           >
-            {line}
+            {line.toUpperCase()}
           </motion.span>
         ))}
       </motion.div>
